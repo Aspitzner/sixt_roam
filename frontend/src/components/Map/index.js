@@ -2,32 +2,40 @@ import React, { useState } from "react";
 import { GoogleMap, InfoWindow, LoadScript, Marker } from "@react-google-maps/api";
 import './styles.css';
 
+import icons from "../../assets";
 const Map = () => {
+
+  const image =
+  "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png";
     const initialMarkers = [
         {
             position: {
-                lat: 28.625485,
-                lng: 79.821091
+                lat: 48.1357,
+                lng: 11.5718
             },
-            label: { color: "white", text: "P1" },
-            draggable: true
-        },
-        {
-            position: {
-                lat: 28.625293,
-                lng: 79.817926
-            },
-            label: { color: "white", text: "P2" },
+            // label: { color: "white", text: "Papapa" },
+            icon: icons.calloutRoam, 
             draggable: false
-        },
+        }, 
         {
-            position: {
-                lat: 28.625182,
-                lng: 79.81464
-            },
-            label: { color: "white", text: "P3" },
-            draggable: true
-        },
+          position: {
+            lat: 48.1365,
+            lng: 11.5718
+          },
+          // label: { color: "white", text: "P1" },
+          icon: icons.calloutSixt, 
+          draggable: true
+        }, 
+        {
+          position: {
+            lat: 48.1365,
+            lng: 11.5770
+          },
+          // label: { color: "white", text: "P1" },
+          icon: icons.calloutCharger, 
+          draggable: true
+        }, 
+
     ];
     
     const [activeInfoWindow, setActiveInfoWindow] = useState("");
@@ -268,6 +276,7 @@ const Map = () => {
                     {markers.map((marker, index) => (
                         <Marker 
                             key={index} 
+                            icon={marker.icon}
                             position={marker.position}
                             label={marker.label}
                             draggable={marker.draggable}
