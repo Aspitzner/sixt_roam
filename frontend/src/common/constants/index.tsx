@@ -1,5 +1,5 @@
 export const paths = {
-    BASE_URL: 'http://localhost:8080',
+    BASE_URL: 'https://sixt-roam.herokuapp.com/api',
     ROAMS: '/roams',
     CHARGERS: '/chargers',
     COSTS: '/costs',

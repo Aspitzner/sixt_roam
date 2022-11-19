@@ -10,6 +10,12 @@
     font: Roboto; 
 }
 
+@media (max-width: 1000px){
+    .navbar {
+        padding: 0.5rem 50px;
+    }
+}
+
 img {
     width: 100px; 
 }

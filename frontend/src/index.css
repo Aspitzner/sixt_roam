@@ -37,21 +37,34 @@ button {
 form {
   color:black; 
   align-items: start;
-  margin: 3rem auto; 
-  padding: 2rem 4rem; 
+  margin: auto; 
+  padding: 6rem; 
+  text-align: start;
   display: flex;
   flex-flow: column;
-  width: 30%; 
+  max-width: 33%;
+}
+
+@media (max-width: 1000px){
+  form {
+    max-width: 70%; 
+  }
 }
 
 form > .subtitle {
   font-size: larger;
   text-align: start;
+  padding-right: auto;  
 }
 
 form > h1 { 
   color: #2E3440; 
   font-size: xx-large;
+  margin-bottom: 0rem
+}
+
+form > h3 { 
+  margin-bottom: 1.5rem
 }
 
 form > input { 
@@ -61,11 +74,10 @@ form > input {
   text-align: left; 
   padding-top: 0.8rem;
   padding-bottom: 0.25rem;  
-  padding-right: 65%;
   border: solid; 
   border-width: 0;
   font-size: large;
-
+  width: 100%;
   border-bottom: 1px solid black; 
 }
 
