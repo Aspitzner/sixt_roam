@@ -1,0 +1,14 @@
+.landing { 
+    display: flex;
+    flex-flow: column;
+    /* padding: 2rem 10rem;  */
+    margin-top: -5rem; 
+    z-index: -1;
+    height: 50%; 
+}
+
+@media (max-width: 1000px){
+    .landing {
+        padding: 0; 
+    }
+}

@@ -9,7 +9,7 @@ const Navbar = () => {
     return (
         <nav className="navbar">
             <div className="navbar--options">
-                <Link to="/">
+                <Link to="/about">
                     <img src={icons.logo} alt="logo"/>
                     <img src={icons.logoRoam} alt="logo"/>
                 </Link>
@@ -19,7 +19,7 @@ const Navbar = () => {
                     <h1>Where to charge</h1>
                 </NavLink>
                 <NavLink className={({ isActive }) => isActive ? 'active' : ''} to="/roamer">
-                    <h1>Become a roamer</h1>
+                    <h1>Become a Roamer</h1>
                 </NavLink>
             </div>
         </nav>

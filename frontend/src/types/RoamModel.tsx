@@ -6,4 +6,6 @@ export default interface RoamModel {
         street_number: number, 
         owner_id: number,
         charger_type: string,
+        latitude: number, 
+        longitude: number 
 }

@@ -12,7 +12,7 @@ const Feedback = () => {
     return (
         <section>
             <p className="feedback">We received your information successfully. We will contact you shortly. Thanks for trusting in the Sixt fleet. </p>
-            <button className="button" onClick={() => navigate("/")}>Volver</button>
+            <button className="button" onClick={() => navigate("/")}>Back to Home</button>
         </section>
     )
 }
