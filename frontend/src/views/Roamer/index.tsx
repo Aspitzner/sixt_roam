@@ -7,13 +7,18 @@ const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
 
 const Roamer = () => {
 
-    const [user, setUser] = useState('');
-    const [pwd, setPwd] = useState('');
+    const [firstname, setFirstname] = useState('');
+    const [lastname, setLastname] = useState('');
+    const [postalCode, setPostalCode] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [email, setEmail] = useState('');
+    const [chargerType, setChargerType] = useState('');
+
 
     const navigate = useNavigate();
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        navigate("/"); 
+        navigate("/roamer/success"); 
     }
 
     return (
@@ -26,8 +31,8 @@ const Roamer = () => {
                     type="text"
                     id="firstname"
                     autoComplete="off"
-                    onChange={(e) => setUser(e.target.value)}
-                    value={user}
+                    onChange={(e) => setFirstname(e.target.value)}
+                    value={firstname}
                     required
                 />
                 <input
@@ -35,8 +40,8 @@ const Roamer = () => {
                     type="text"
                     id="lastname"
                     autoComplete="off"
-                    onChange={(e) => setUser(e.target.value)}
-                    value={user}
+                    onChange={(e) => setLastname(e.target.value)}
+                    value={lastname}
                     required
                 />
                 <input
@@ -44,16 +49,16 @@ const Roamer = () => {
                     type="text"
                     id="postalcode"
                     autoComplete="off"
-                    onChange={(e) => setUser(e.target.value)}
-                    value={user}
+                    onChange={(e) => setPostalCode(e.target.value)}
+                    value={postalCode}
                     required
                 />
                 <input
                     placeholder="Email address"
-                    type="password"
-                    id="password"
-                    onChange={(e) => setPwd(e.target.value)}
-                    value={pwd}
+                    type="email"
+                    id="email"
+                    onChange={(e) => setEmail(e.target.value)}
+                    value={email}
                     required
                 />
                 <input
@@ -61,13 +66,21 @@ const Roamer = () => {
                     type="text"
                     id="phonenumber"
                     autoComplete="off"
-                    onChange={(e) => setUser(e.target.value)}
-                    value={user}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    value={phoneNumber}
                     required
                 />
-                
+                <select
+                    placeholder="EV Charger Type"
+                    onChange = {e => setChargerType(e.target.value)}
+                >
+                    <option value="grapefruit">Grapefruit</option>
+                    <option value="lime">Lime</option>
+                    <option selected value="coconut">Coconut</option>
+                    <option value="mango">Mango</option>
+                </select>
                 <p>This site is protected by reCAPTCHA and Google Privacy Policy and Terms of Service apply</p>
-                <button>Submit</button>
+                <button className="button">Submit</button>
             </form>
         </section>
     )

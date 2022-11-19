@@ -69,12 +69,28 @@ form > input {
   border-bottom: 1px solid black; 
 }
 
-form > button {
+form > select { 
+  color: #2E3440; 
+  margin-bottom: 2rem; 
+  background-color: transparent;
+  text-align: left; 
+  padding-top: 0.8rem;
+  padding-bottom: 0.25rem;  
+  padding-right: 65%;
+  border: solid; 
+  border-width: 0;
+  font-size: large;
+
+  border-bottom: 1px solid black; 
+}
+
+
+.button {
   width: 15rem; 
   margin: 1rem auto;
 }
 
-form > button { 
+.button { 
   background-color: #F4811E;
   font-weight: bolder;
   color: white; 

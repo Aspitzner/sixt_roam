@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Landing from './views/Landing';
 import Roamer from './views/Roamer'; 
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
+import Feedback from './views/Feedback';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing/>}/>
           <Route path="/roamer" element={<Roamer/>}/>
+          <Route path="/roamer/success" element={<Feedback/>}/>
         </Routes>
         </div>
       </div>
