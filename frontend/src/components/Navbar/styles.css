@@ -1,0 +1,54 @@
+.navbar {
+    display: flex;
+    overflow-y: hidden; 
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 10rem;
+    font-size: 0.8rem; 
+    background-color: white;
+    position: sticky; 
+    font: Roboto; 
+}
+
+img {
+    width: 100px; 
+}
+
+
+.navbar--options {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.navbar--options  h1 {
+    margin: 1rem;
+    padding: 0.2rem 0; 
+    color: #2E3440;  
+}
+
+.navbar--options h2 {
+    padding: 0.2rem 0; 
+}
+
+.navbar--options  h1:hover {
+    margin: 1rem;
+    padding: 0.2rem 0; 
+    color: #F4811E;  
+}
+
+.active h1 {
+    margin: 1rem;
+    color: #F4811E;  
+    padding: 0.2rem 0; 
+    border-bottom: 2px solid currentColor; 
+}
+
+
+
+
+
+
+
+
+
