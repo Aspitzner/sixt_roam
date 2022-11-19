@@ -1,45 +1,83 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { GoogleMap, InfoWindow, LoadScript, Marker } from "@react-google-maps/api";
 import './styles.css';
 
+
 import icons from "../../assets";
+import roamService from "../../services/RoamService";
 const Map = () => {
 
-  const image =
-  "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png";
-    const initialMarkers = [
-        {
-            position: {
-                lat: 48.1357,
-                lng: 11.5718
-            },
-            // label: { color: "white", text: "Papapa" },
-            icon: icons.calloutRoam, 
-            draggable: false
-        }, 
-        {
-          position: {
-            lat: 48.1365,
-            lng: 11.5718
-          },
-          // label: { color: "white", text: "P1" },
-          icon: icons.calloutSixt, 
-          draggable: true
-        }, 
-        {
-          position: {
-            lat: 48.1365,
-            lng: 11.5770
-          },
-          // label: { color: "white", text: "P1" },
-          icon: icons.calloutCharger, 
-          draggable: true
-        }, 
+  const stations = require("./stations.json"); 
 
-    ];
+
+  const [roams, setRoams] = useState(); 
+  const [activeInfoWindow, setActiveInfoWindow] = useState("");
+
+
+  const initialMarkers = [
+    {
+        position: {
+            lat: 48.1357,
+            lng: 11.5718
+        },
+        // label: { color: "white", text: "Papapa" },
+        icon: icons.calloutRoam, 
+        draggable: false
+    }, 
+    {
+      position: {
+        lat: 48.1365,
+        lng: 11.5718
+      },
+      // label: { color: "white", text: "P1" },
+      icon: icons.calloutSixt, 
+      draggable: true
+    }, 
+    {
+      position: {
+        lat: 48.1365,
+        lng: 11.5770
+      },
+      // label: { color: "white", text: "P1" },
+      icon: icons.calloutCharger, 
+      draggable: true
+    }, 
+
+];
+  const [markers, setMarkers] = useState(initialMarkers);
+
+  useEffect( () => {
+    roamService.getRoams()
+    .then(
+      (value) => {
+        setRoams(value);
+        
+        
+        const roamMarkers = value.map(
+          r =>  {
+            return {
+              original: r, 
+              position: {
+                lat: r.latitude, 
+                lng: r.longitude
+              }, 
+              icon: icons.calloutRoam, 
+              draggable: false
+            }
+          }
+        ); 
+
+        setMarkers(roamMarkers); 
+        console.log(value); 
+      }, 
+      (reason) => {
+        
+      }
+    )
+  }, [])
+
     
-    const [activeInfoWindow, setActiveInfoWindow] = useState("");
-    const [markers, setMarkers] = useState(initialMarkers);
+
 
     const containerStyle = {
         width: "100%",
@@ -261,6 +299,7 @@ const Map = () => {
         }
       ]
 
+      console.log(stations)
     return (
             <LoadScript googleMapsApiKey='AIzaSyANJdtSz3eBDGrcn1TOxXaRp0iZ7CqWaSc'>
                 <GoogleMap 
@@ -287,11 +326,33 @@ const Map = () => {
                                 (activeInfoWindow === index)
                                 &&
                                 <InfoWindow position={marker.position}>
-                                    <b>{marker.position.lat}, {marker.position.lng}</b>
+                                    <b>{marker.original.street_name} {marker.original.street_number}, {marker.original.pc}</b>
                                 </InfoWindow>
                             }  
                         </Marker>
                     ))}
+                    {
+                      stations.map( (station, index) => (
+                        <Marker 
+                        key={"A"+index} 
+                        icon={icons.calloutCharger}
+                        position={  {lng: station.longitude, lat: station.latitude }}
+                        onDragEnd={event => markerDragEnd(event, index)}
+                        onClick={event => markerClicked(station, "A"+index)} 
+                      >
+              
+                        {
+                            (activeInfoWindow === ('A'+index))
+                            &&
+                            <InfoWindow position={{lng: station.longitude, lat: station.latitude }}>
+                                <b>{station.street_name} {station.street_number}, 80805</b>
+                            </InfoWindow>
+                        }  
+                      </Marker>
+                      )
+                      )
+                    }
+
                 </GoogleMap>
             </LoadScript>
         
