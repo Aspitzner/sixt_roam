@@ -1,6 +1,7 @@
 import { paths } from "../common/constants";
 import axios from "axios";
 import RoamModel from "../types/RoamModel";
+import ChargerTypeModel from "../types/ChargerTypeModel";
 
 class RoamService {
 
@@ -25,22 +26,22 @@ class RoamService {
         return resp.data;     
     }
 
-    public async getRoams(): Promise<Array<string>> {
-        const resp = await this.axiosInstance.get<Array<string>>(paths.BASE_URL, {}); 
+    public async getRoams(): Promise<Array<RoamModel>> {
+        const resp = await this.axiosInstance.get<Array<RoamModel>>(paths.BASE_URL + paths.ROAMS, {withCredentials: false}); 
         return resp.data;     
     }
 
-    public async getChargerTypes(): Promise<Array<string>> {
-        const resp = await this.axiosInstance.get<Array<string>>(paths.BASE_URL, {}); 
+    public async getChargerTypes(): Promise<Array<ChargerTypeModel>> {
+        const resp = await this.axiosInstance.get<Array<ChargerTypeModel>>(paths.BASE_URL + paths.CHARGERS, {withCredentials: false}); 
         return resp.data;     
     }
 
     public async requestRoam(roamId: string, bookingNumber: string, email: string) {
-        const resp = await this.axiosInstance.get<Array<string>>(paths.BASE_URL, {}); 
+        const resp = await this.axiosInstance.get<Array<string>>(paths.BASE_URL, {withCredentials: false}); 
     }
 
     public async releaseRoam(roamId: string, bookingNumber: string, email: string): Promise<number> {
-        const resp = await this.axiosInstance.get<number>(paths.BASE_URL, {}); 
+        const resp = await this.axiosInstance.get<number>(paths.BASE_URL, {withCredentials: false}); 
         return resp.data; 
     }
 

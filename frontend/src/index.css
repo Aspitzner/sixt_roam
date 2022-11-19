@@ -34,6 +34,14 @@ button {
   text-align: start; 
 }
 
+.placeholder { 
+  color: #000000;
+  opacity: 0.5; 
+  font-weight: bold;
+  text-align: start; 
+}
+
+
 form {
   color:black; 
   align-items: start;
@@ -78,7 +86,7 @@ form > input {
   border-width: 0;
   font-size: large;
   width: 100%;
-  border-bottom: 1px solid black; 
+  border-bottom: 0.8px solid rgba(0, 0, 0, 0.438); 
 }
 
 form > select { 

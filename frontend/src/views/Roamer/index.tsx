@@ -1,6 +1,8 @@
 import { useState, FormEvent, useEffect, useContext } from "react";
 import {Link, useNavigate} from "react-router-dom"; 
 import { paths } from "../../common/constants";
+import roamService from "../../services/RoamService";
+import ChargerTypeModel from "../../types/ChargerTypeModel";
 
 const USER_REGEX = /^[A-z][A-z0-9-_]{3,23}$/;
 const PWD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%]).{8,24}$/;
@@ -13,7 +15,18 @@ const Roamer = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [email, setEmail] = useState('');
     const [chargerType, setChargerType] = useState('');
+    const [chargerTypes, setChargerTypes] = useState<Array<ChargerTypeModel>>();
+    const [error, setError] = useState<boolean>(false);
 
+
+    roamService.getChargerTypes()
+        .then(
+            (value) => {
+                setError(false);
+                setChargerTypes(value)
+            },    
+            (reason) =>  setError(true)    
+        ) 
 
     const navigate = useNavigate();
 
@@ -71,13 +84,14 @@ const Roamer = () => {
                     required
                 />
                 <select
-                    placeholder="EV Charger Type"
+                    placeholder="Type to search"
+                    className="placeholder"
                     onChange = {e => setChargerType(e.target.value)}
                 >
-                    <option value="grapefruit">Grapefruit</option>
-                    <option value="lime">Lime</option>
-                    <option selected value="coconut">Coconut</option>
-                    <option value="mango">Mango</option>
+                
+                        <option selected={true} disabled={true}>Charger Type</option>  
+                        {chargerTypes && chargerTypes.map( chargerType => <option value={chargerType.id}>{chargerType.comm_name}</option>)} 
+            
                 </select>
                 <p>This site is protected by reCAPTCHA and Google Privacy Policy and Terms of Service apply</p>
                 <button className="button">Submit</button>
