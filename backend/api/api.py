@@ -1,16 +1,26 @@
 import flask
+from flask_cors import CORS
 import psycopg2
 import urllib.parse as urlparse
 import json
 from flask import request, Response
+import urllib.request
+from urllib.request import Request
+import csv
+from datetime import datetime
+import requests
+
+
 
 app = flask.Flask(__name__)
+
 
 dbname = ""
 user = ""
 password = ""
 host = ""
 port = ""
+
 
 
 class Charger:
@@ -46,7 +56,7 @@ class Owner:
 
 class Cost:
     def __init__(self, pc, energy_cost):
-        self.pc = pc
+        self.pc = pc.strip()
         self.energy_cost = energy_cost
     def to_json(self):
         data = {}
@@ -56,13 +66,17 @@ class Cost:
         
 
 class Roam:
-    def __init__(self, id, pc,street_name,street_number,owner_id,charger_type):
-        self.id = id
-        self.pc = pc
+    def __init__(self, id, pc,street_name,street_number,owner_id,charger_type,city,latitude,longitude,available):
+        self.id = id.strip()
+        self.pc = pc.strip()
         self.street_name = street_name
         self.street_number = street_number
         self.owner_id = owner_id
         self.charger_type = charger_type
+        self.city = city
+        self.latitude = latitude
+        self.longitude = longitude
+        self.available = available
     def to_json(self):
         data = {}
         data['id'] = self.id
@@ -71,12 +85,16 @@ class Roam:
         data['street_number'] = self.street_number
         data['owner_id'] = self.owner_id
         data['charger_type'] = self.charger_type
+        data['city'] = self.city
+        data['latitude'] = self.latitude
+        data['longitude'] = self.longitude
+        data['available'] = self.available
         return data
 
 
 class Charge:
     def __init__(self, roam_id, reservation_id,init_time,finish_time,cost):
-        self.roam_id = roam_id
+        self.roam_id = roam_id.strip()
         self.reservation_id = reservation_id
         self.init_time = init_time
         self.finish_time = finish_time
@@ -91,6 +109,31 @@ class Charge:
         data['cost'] = self.cost
         
         return data
+
+class Position:
+    def __init__(self, id, title,address,latitude,longitude):
+        self.id = id
+        self.title = title
+        self.address = address
+        self.latitude = latitude
+        self.longitude = longitude
+    def to_json(self):
+        data = {}
+        data['id'] = self.id
+        data['title'] = self.title
+        data['address'] = self.address
+        data['latitude'] = self.latitude
+        data['longitude'] = self.longitude
+        return data
+
+def return_bad_request():
+    response = Response(
+            "Bad Request",
+            status=400,)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
 
 def create_tables():
     
@@ -125,7 +168,7 @@ def json_owner(row,cur):
         values.append(obj)
         row = cur.fetchone()
     
-    return json.dumps(values)
+    return values
 
 # Chargers
 def json_charger(row,cur):
@@ -136,7 +179,7 @@ def json_charger(row,cur):
         values.append(obj)
         row = cur.fetchone()
     
-    return json.dumps(values)
+    return values
 
 # Charges/Uses
 def json_charges(row,cur):
@@ -147,7 +190,7 @@ def json_charges(row,cur):
         values.append(obj)
         row = cur.fetchone()
     
-    return json.dumps(values)
+    return values
 
 def json_cost(row,cur):
     values = []
@@ -157,17 +200,27 @@ def json_cost(row,cur):
         values.append(obj)
         row = cur.fetchone()
     
-    return json.dumps(values)
+    return values
 
 def json_roam(row,cur):
     values = []
     
     while row is not None:
-        obj = Roam(row[0],row[1],row[2],row[3],row[4],row[5]).to_json()
+        obj = Roam(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9]).to_json()
         values.append(obj)
         row = cur.fetchone()
     
-    return json.dumps(values)
+    return values
+
+def json_pos(row,cur):
+    values = []
+    
+    while row is not None:
+        obj = Position(row[0],row[1],row[2],row[3],row[4]).to_json()
+        values.append(obj)
+        row = cur.fetchone()
+    
+    return values
 
 def default_get(db,json_call):
     con = init_connection()
@@ -182,11 +235,50 @@ def default_get(db,json_call):
     return json_call(row,cur)
 
 
-@app.route('/roams', methods=['GET'])
+@app.route('/api/roams', methods=['GET'])
 def roams():
-    return default_get("roams",json_roam)
+    response = flask.jsonify(default_get("roams",json_roam))
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
 
-@app.route('/roams/<id>', methods=['GET'])
+@app.route('/api/roams', methods=['POST'])
+def insert_roam():
+
+    id = request.args.get('id')
+    pc = request.args.get('pc')
+    street_name = request.args.get('street_name')
+    street_number = request.args.get('street_number')
+    owner_id = request.args.get('owner_id')
+    charge_type = request.args.get('charge_type')
+    city = request.args.get('city')
+    latitude = request.args.get('latitude')
+    longitude = request.args.get('longitude')
+
+    if (id is None or pc is None or street_name is None or street_number is None or owner_id is None or charge_type is None or city is None or latitude is None or longitude is None):
+        return return_bad_request()
+
+    con = init_connection()
+    cur = con.cursor()
+
+    try:
+        query = "insert into roams values ('"+id+"','"+pc+"','"+street_name+"',"+street_number+","+owner_id+","+charge_type+",'"+city+"',"+latitude+","+longitude+",true);"
+        print(query)
+        cur.execute(query)
+    except:
+        return return_bad_request()
+    con.commit()
+    cur.close()
+    con.close()
+    response = flask.jsonify(json.dumps({}), 200)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+
+
+@app.route('/api/roams/<id>', methods=['GET'])
 def roams_by_id(id):
     con = init_connection()
     cur = con.cursor()
@@ -197,21 +289,37 @@ def roams_by_id(id):
         return json.dumps({})
     row = cur.fetchone()
 
-    return json.dumps(Roam(row[0],row[1],row[2],row[3],row[4],row[5]).to_json())
+    response = flask.jsonify(Roam(row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9]).to_json())
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
 
-@app.route('/chargers', methods=['GET'])
+@app.route('/api/chargers', methods=['GET'])
 def chargers():
-    return default_get("chargers",json_charger)
+    response =  flask.jsonify(default_get("chargers",json_charger))
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
 
-@app.route('/costs', methods=['GET'])
+@app.route('/api/costs', methods=['GET'])
 def costs():
-    return default_get("costs",json_cost)
+    response = flask.jsonify(default_get("costs",json_cost))
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
 
-@app.route('/owners', methods=['GET'])
+@app.route('/api/owners', methods=['GET'])
 def owners():
-    return default_get("owners",json_owner)
+    response =  flask.jsonify(default_get("owners",json_owner))
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
 
-@app.route('/owners', methods=['POST'])
+@app.route('/api/owners', methods=['POST'])
 def insert_owners():
     name = request.args.get('name')
     surname = request.args.get('surname')
@@ -219,10 +327,7 @@ def insert_owners():
     email = request.args.get('email')
 
     if (name is None or surname is None or phone_number is None or email is None):
-        return Response(
-        "Bad Request",
-        status=400,
-    )
+        return return_bad_request()
 
     con = init_connection()
     cur = con.cursor()
@@ -232,29 +337,53 @@ def insert_owners():
         print(query)
         cur.execute(query)
     except:
-        return Response(
-        "Bad Request",
-        status=400,)
+        return return_bad_request()
     con.commit()
     cur.close()
     con.close()
-    return json.dumps({}), 200
+    response = flask.jsonify(json.dumps({}), 200)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
 
-@app.route('/charges', methods=['GET'])
+@app.route('/api/charges', methods=['GET'])
 def charges():
-    return default_get("charges",json_charges)
+    response = flask.jsonify(default_get("charges",json_charges))
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
 
-@app.route('/charges', methods=['POST'])
+@app.route('/api/charges/<roam_id>', methods=['GET'])
+def get_last_charge(roam_id):
+    
+    con = init_connection()
+    cur = con.cursor()
+    results = []
+
+    cur.execute("select * from charges where roam_id = '" + roam_id+"' and finish_time is null")
+    if cur.rowcount == 0:
+        return json.dumps({})
+    row = cur.fetchone()
+
+    response = flask.jsonify(Charge(row[0],row[1],row[2],row[3],row[4]).to_json())
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+
+
+@app.route('/api/charges', methods=['POST'])
 def insert_charge():
     roam_id = request.args.get('roam_id')
     reservation_id = request.args.get('reservation_id')
-    init_time = request.args.get('init_time')
-
-    if (roam_id is None or reservation_id is None or init_time is None):
-        return Response(
-        "Bad Request",
-        status=400,
-    )
+    init_time = datetime.now()
+    
+    
+    if (roam_id is None or reservation_id is None):
+        return return_bad_request()
+    
 
     con = init_connection()
     cur = con.cursor()
@@ -262,32 +391,126 @@ def insert_charge():
     try:
         query = "insert into charges(roam_id, reservation_id, init_time) values ('"+roam_id+"',"+str(reservation_id)+",'"+str(init_time)+"');"
         cur.execute(query)
+        
+        query = "update roams set available = false where id = '"+roam_id+"';"
+        
+        cur.execute(query)
     except:
-        return Response(
-        "Bad Request",
-        status=400,)
+        return return_bad_request()
     con.commit()
     cur.close()
     con.close()
-    return json.dumps({}), 200
+    response = flask.jsonify(json.dumps({}), 200)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
 
-@app.route('/charges', methods=['PUT'])
+
+@app.route('/api/charges', methods=['PUT'])
 def finish_charge():
     roam_id = request.args.get('roam_id')
     reservation_id = request.args.get('reservation_id')
-    finish_time = request.args.get('finish_time')
+    #finish_time = request.args.get('finish_time')
+    finish_time = datetime.now()
 
-    if (finish_time is None):
-        return Response(
-        "Bad Request",
-        status=400,
-    )
+    if (roam_id is None or reservation_id is None):
+        return return_bad_request()
 
     con = init_connection()
     cur = con.cursor()
 
     try:
-        query = "update charges set finish_time = '"+finish_time+"', cost = ((select extract(epoch from '"+finish_time+"'::timestamp - init_time::timestamp)/60 from charges where charges.roam_id = '"+roam_id+"' and charges.reservation_id = "+reservation_id+") * ((select avg_power from chargers where chargers.id = (select charger_type from roams where roams.id = charges.roam_id)) * (select energy_cost from costs where costs.pc = (select r.pc from roams as r where r.id = charges.roam_id)))) where roam_id = '"+roam_id+"' and reservation_id = "+reservation_id+";"
+        query = "update charges set finish_time = '"+str(finish_time)+"', cost = ((select extract(epoch from '"+str(finish_time)+"'::timestamp - init_time::timestamp)/60 from charges where charges.roam_id = '"+roam_id+"' and charges.reservation_id = "+reservation_id+") * ((select avg_power from chargers where chargers.id = (select charger_type from roams where roams.id = charges.roam_id)) * (select energy_cost from costs where costs.pc = (select r.pc from roams as r where r.id = charges.roam_id)))) where roam_id = '"+roam_id+"' and reservation_id = "+reservation_id+";"
+        cur.execute(query)
+        
+        query = "update roams set available = true where id = '"+roam_id+"';"
+        cur.execute(query)
+    except:
+        return return_bad_request()
+    con.commit()
+    cur.close()
+    con.close()
+    response = flask.jsonify(json.dumps({}), 200)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+
+# SIXT API
+
+@app.route('/api/sixt/stations', methods=['GET'])
+def sixt_stations():
+    term = request.args.get('term')
+    vehicleType = request.args.get('vehicleType')
+    #type = request.args.get('type')
+    type = "station"
+    print("request")
+    req = Request(url="https://api.orange.sixt.com/v1/locations?term="+term+"&vehicleType="+vehicleType+"&type="+type,headers={'User-Agent': 'Mozilla/5.0'})
+    contents = json.loads(urllib.request.urlopen(req).read())
+    
+    response = flask.jsonify(contents)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+
+@app.route('/api/sixt/positions', methods=['GET'])
+def sixt_positions_munich():
+   
+    response = flask.jsonify(default_get("positions",json_pos))
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+    
+
+@app.route('/api/sixt/stations/<station_id>', methods=['GET'])
+def sixt_station_by_id(station_id):
+    req = Request(url="https://api.orange.sixt.com/v1/locations/"+station_id,headers={'User-Agent': 'Mozilla/5.0'})
+    contents = json.loads(urllib.request.urlopen(req).read())
+    
+    response = flask.jsonify(contents)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+
+@app.route('/api/sixt/stations/positions', methods=['GET'])
+def sixt_station_positions():
+    term = request.args.get('term')
+    vehicleType = request.args.get('vehicleType')
+    type = request.args.get('type')
+    type = "station"
+
+    print("request")
+    a = requests.get("https://api.orange.sixt.com/v1/locations?term=Munich&vehicleType=car&type=station",headers={'User-Agent': 'Mozilla/5.0'},stream='True',verify='sni-cloudflaressl-com.pem')
+    #a = urllib.request.urlopen(req).read()
+    print(a)
+    #contents = json.loads(urllib.request.urlopen(req).read())
+    contents = json.loads(a.text)
+    print(contents)
+
+    positions = []
+    for station in contents:
+        print(station[0]["id"])
+        position = sixt_station_by_id(station[0]["id"])["coordinates"]
+        positions.append(position)
+        print(position)
+    
+    
+    response = flask.jsonify(positions)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+
+def insert_psql_roam(id,pc,street_name,street_number,owner_id,charge_type,city,latitude,longitude):
+    con = init_connection()
+    cur = con.cursor()
+
+    try:
+        query = "insert into roams values ('"+id+"','"+pc+"','"+street_name+"',"+str(street_number)+","+str(owner_id)+","+str(charge_type)+",'"+city+"',"+str(latitude)+","+str(longitude)+");"
         print(query)
         cur.execute(query)
     except:
@@ -297,10 +520,65 @@ def finish_charge():
     con.commit()
     cur.close()
     con.close()
-    return json.dumps({}), 200
+
+# def insert_csv_roams():
+#     id = 6
+#     with open('coord_roam.csv', newline='') as csv_file:
+#         csv_reader = csv.reader(csv_file, delimiter=',')
+#         line_count = 0
+#         for row in csv_reader:
+#             #print("Pair: (" + row[0] + ", "+ row[1]+")")
+#             insert_psql_roam("roam"+str(id),"80805","Boltzmannstrasse",18,2,1,"Muenchen",row[0],row[1])
+#             line_count += 1
+#             id += 1
+#         print(f'Processed {line_count} lines.')
+
+# def load_positions():
+#     f = open('locations_munich.json')
+#     data = json.load(f)
+#     print(data)
+#     with open('loc.csv', 'w', newline='') as csvfile:
+#         spamwriter = csv.writer(csvfile, delimiter=',')
+#         for d in data:
+#             id = d["id"]
+#             title = d["title"]
+#             subtitle = d["subtitle"]
+#             spamwriter.writerow([id,title,subtitle])
+
+def insert_psql_loc(id,title,subtitle,latitude,longitude):
+    con = init_connection()
+    cur = con.cursor()
+
+    try:
+        query = "insert into positions values ('"+id+"','"+title+"','"+subtitle+"',"+str(latitude)+","+str(longitude)+");"
+        print(query)
+        cur.execute(query)
+    except:
+        return Response(
+        "Bad Request",
+        status=400,)
+    con.commit()
+    cur.close()
+    con.close()
+
+def insert_loc():
+    with open('loc.csv', newline='') as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+        for row in csv_reader:
+            #print("Pair: (" + row[0] + ", "+ row[1]+")")
+            insert_psql_loc(row[0],row[1],row[2],row[3],row[4])
+            line_count += 1
+            
+        print(f'Processed {line_count} lines.')
+
 
 def main():
     app.run()
+    #insert_csv_roams()
+    #load_positions()
+    #insert_loc()
+    
 
 if __name__ == "__main__":
     main()
