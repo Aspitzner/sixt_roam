@@ -299,7 +299,6 @@ const Map = () => {
         }
       ]
 
-      console.log(stations)
     return (
             <LoadScript googleMapsApiKey='AIzaSyANJdtSz3eBDGrcn1TOxXaRp0iZ7CqWaSc'>
                 <GoogleMap 
@@ -317,19 +316,22 @@ const Map = () => {
                             style={{backgroundColor: "red"}}
                             key={index} 
                             onHov
-                            icon={marker.original?.enabled ? icons.calloutRoam : icons.calloutRoam2}
+                            icon={marker.original?.available ? icons.calloutRoam : icons.calloutRoam2}
                             position={marker.position}
                             label={marker.label}
                             draggable={marker.draggable}
-                            cursor={'not-allowed'}
+                            cursor={marker.original?.available ? '': 'not-allowed'}
                             onDragEnd={event => markerDragEnd(event, index)}
-                            onClick={event => marker.original?.enabled ? markerClicked(marker, index): null} 
+                            onClick={event => marker.original?.available ? markerClicked(marker, index): null} 
                         >
                             {
                                 (activeInfoWindow === index)
                                 &&
                                 <InfoWindow position={marker.position}>
-                                    <b>{marker.original.street_name} {marker.original.street_number}, {marker.original.pc}</b>
+                                  <div>
+                                    <b>ROAM {marker.original.id}</b>
+                                    <p>{marker.original.street_name} {marker.original.street_number}, {marker.original.pc}</p>
+                                  </div>
                                 </InfoWindow>
                             }  
                         </Marker>

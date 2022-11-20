@@ -14,13 +14,16 @@ const Release = () => {
     const navigate = useNavigate();
     let [searchParams] = useSearchParams();
 
-
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        roamData && roamService.releaseRoam(roamData?.id, bookingNumber, email);  
-    }
-
     const [roamData, setRoamData] = useState<RoamModel | null>();
     const [error, setError] = useState<boolean>(false);
+
+
+    const handleSubmit = () => {
+        roamData && roamService.releaseRoam(roamData.id, bookingNumber, email).then(
+            value =>  console.log("OK", roamData)
+        )
+        navigate('/') 
+    }
 
 
     useEffect(
@@ -30,10 +33,10 @@ const Release = () => {
             (value) => {
                 setError(false);
                 setRoamData(value);
-    
-                if (!roamData?.enabled) 
-                    navigate("/release")
-            },
+
+                if (value && value.available) 
+                navigate('/request?roamId='+searchParams.get("roamId"))
+               },
             (reason) =>  setError(true)
         )}, []
     )
@@ -43,7 +46,8 @@ const Release = () => {
         <section>
             {
                 roamData && 
-            <form onSubmit={handleSubmit}>
+                <div>
+            <form>
                 <h1>You are about to release ROAM {roamData?.id}</h1>
                 <h3>{roamData?.street_name} {roamData?.street_number}, {roamData?.pc}, {roamData?.city}</h3>
                 <input
@@ -64,8 +68,9 @@ const Release = () => {
                     value={email}
                     required
                 />
-                <button className="button">Release</button>
-            </form>
+            </form>   <button onClick={()=>handleSubmit()} className="button">Release</button>
+
+            </div>
     }
         </section>
     )

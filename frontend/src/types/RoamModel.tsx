@@ -8,5 +8,5 @@ export default interface RoamModel {
         charger_type: string,
         latitude: number, 
         longitude: number, 
-        enabled: boolean
+        available: boolean
 }

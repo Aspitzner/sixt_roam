@@ -18,8 +18,11 @@ const Request = () => {
 
     const navigate = useNavigate();
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        roamData && roamService.requestRoam(roamData.id, bookingNumber, email); 
+    const handleSubmit = () => {
+        roamData && roamService.requestRoam(roamData.id, bookingNumber, email).then(
+            value =>  console.log("OK", roamData)
+        )
+        navigate('/') 
     }
 
     useEffect( ()=> {
@@ -30,7 +33,9 @@ const Request = () => {
             setError(false);
             setRoamData(value);
 
-            if (!roamData?.enabled) 
+            console.log(value)
+
+            if (value && !value.available) 
                 navigate('/release?roamId='+searchParams.get("roamId"))
         },
         (reason) =>  setError(true)
@@ -43,7 +48,7 @@ const Request = () => {
             ( !error  || <h3>401 - Bad Request</h3> )
             && 
             roamData && 
-            ( !roamData.enabled || <form onSubmit={handleSubmit}>
+            ( !roamData.available ||<div> <form>
                 <h1>ACTIVATE ROAM {searchParams.get("roamId")}</h1>
                 <div>
                     <h3><u>Location</u>:   {roamData.street_name} {roamData.street_number}, {roamData.pc}, {roamData.city}</h3>
@@ -69,8 +74,8 @@ const Request = () => {
                     required
                 />
                 <p className="subtitle">Charging costs will be credited to your Sixt reservation as soon as you activate the Roam. Remember to reenter your data when charging is done.</p>
-                <button className="button">Activate</button>
             </form>
+            <button onClick={()=>handleSubmit()} className="button">Activate</button> </div>
             ) 
             }  
         </div>
