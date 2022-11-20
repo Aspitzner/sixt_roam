@@ -9,7 +9,7 @@ const Navbar = () => {
     return (
         <nav className="navbar">
             <div className="navbar--options">
-                <Link to="/about">
+                <Link to="/">
                     <img src={icons.logo} alt="logo"/>
                     <img src={icons.logoRoam} alt="logo"/>
                 </Link>

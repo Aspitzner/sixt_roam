@@ -23,6 +23,7 @@ class RoamService {
         if (roamId == null)
             return null;
         const resp = await this.axiosInstance.get<RoamModel>(paths.BASE_URL + paths.ROAMS + "/" + roamId, {withCredentials: false}); 
+        resp.data.enabled = true; 
         return resp.data;     
     }
 
@@ -37,12 +38,15 @@ class RoamService {
     }
 
     public async requestRoam(roamId: string, bookingNumber: string, email: string) {
-        const resp = await this.axiosInstance.get<Array<string>>(paths.BASE_URL, {withCredentials: false}); 
+        const resp = await this.axiosInstance.post<Array<string>>(
+            paths.BASE_URL + paths.CHARGES + `?roam_id=${roamId}&reservation_id=${bookingNumber}`
+        , {withCredentials: false}); 
     }
 
-    public async releaseRoam(roamId: string, bookingNumber: string, email: string): Promise<number> {
-        const resp = await this.axiosInstance.get<number>(paths.BASE_URL, {withCredentials: false}); 
-        return resp.data; 
+    public async releaseRoam(roamId: string, bookingNumber: string, email: string) {
+        const resp = await this.axiosInstance.put<Array<string>>(
+            paths.BASE_URL + paths.CHARGES + `?roam_id=${roamId}&reservation_id=${bookingNumber}`
+        , {withCredentials: false}); 
     }
 
 }

@@ -1,6 +1,8 @@
 import { useState, FormEvent, useEffect, useContext } from "react";
-import {Link, useNavigate} from "react-router-dom"; 
+import {Link, useNavigate, useSearchParams} from "react-router-dom"; 
 import { paths } from "../../common/constants";
+import roamService, {  } from "../../services/RoamService";
+import RoamModel from "../../types/RoamModel";
 
 const Release = () => {
 
@@ -10,16 +12,40 @@ const Release = () => {
 
 
     const navigate = useNavigate();
+    let [searchParams] = useSearchParams();
+
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        navigate("/"); 
+        roamData && roamService.releaseRoam(roamData?.id, bookingNumber, email);  
     }
+
+    const [roamData, setRoamData] = useState<RoamModel | null>();
+    const [error, setError] = useState<boolean>(false);
+
+
+    useEffect(
+        () => {roamService.getRoam(
+            searchParams.get("roamId")
+        ).then(
+            (value) => {
+                setError(false);
+                setRoamData(value);
+    
+                if (!roamData?.enabled) 
+                    navigate("/release")
+            },
+            (reason) =>  setError(true)
+        )}, []
+    )
+
 
     return (
         <section>
+            {
+                roamData && 
             <form onSubmit={handleSubmit}>
-                <h1>You are about to release ROAM DX12</h1>
-                <h3>Willi-Graf-Strasse 17, 8085, Munchen</h3>
+                <h1>You are about to release ROAM {roamData?.id}</h1>
+                <h3>{roamData?.street_name} {roamData?.street_number}, {roamData?.pc}, {roamData?.city}</h3>
                 <input
                     placeholder="Booking number"
                     type="text"
@@ -40,6 +66,7 @@ const Release = () => {
                 />
                 <button className="button">Release</button>
             </form>
+    }
         </section>
     )
 }

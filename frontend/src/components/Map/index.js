@@ -314,13 +314,16 @@ const Map = () => {
                 >
                     {markers.map((marker, index) => (
                         <Marker 
+                            style={{backgroundColor: "red"}}
                             key={index} 
-                            icon={marker.icon}
+                            onHov
+                            icon={marker.original?.enabled ? icons.calloutRoam : icons.calloutRoam2}
                             position={marker.position}
                             label={marker.label}
                             draggable={marker.draggable}
+                            cursor={'not-allowed'}
                             onDragEnd={event => markerDragEnd(event, index)}
-                            onClick={event => markerClicked(marker, index)} 
+                            onClick={event => marker.original?.enabled ? markerClicked(marker, index): null} 
                         >
                             {
                                 (activeInfoWindow === index)
