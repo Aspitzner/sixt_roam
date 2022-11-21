@@ -300,7 +300,7 @@ const Map = () => {
       ]
 
     return (
-            <LoadScript googleMapsApiKey='AIzaSyANJdtSz3eBDGrcn1TOxXaRp0iZ7CqWaSc'>
+            <LoadScript googleMapsApiKey=''>
                 <GoogleMap 
                  onLoad={(map) => {
                     map.setOptions({styles: styles})
